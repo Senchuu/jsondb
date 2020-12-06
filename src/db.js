@@ -8,21 +8,30 @@ export default class {
   /**
    *
    * @param {string} dirpath the path where create database folder
-   * @param {string} name the name of the database folder
+   * @param {string} name the name of the database folder (optional)
    */
   constructor(dirpath, name) {
-    if (!existsSync(`${dirpath}/${name}`))
-      mkdirSync(`${dirpath}/${name}`, { recursive: true });
-    this.#dir = `${dirpath}/${name}`;
+    if(name) {
+      if (!existsSync(`${dirpath}/${name}`))
+        mkdirSync(`${dirpath}/${name}`, { recursive: true });
+      this.#dir = `${dirpath}/${name}`;
+    } else {
+      if(!existsSync(`${dirpath}`))
+        mkdirSync(`${dirpath}`);
+      this.#dir = `${dirpath}`
+    }
   }
   /**
    * set the file database
    * @param {string} name The name to sate database file
    */
   set(name) {
-    if (existsSync(`${this.#dir}/${name}.json`))
-      return false;
-    else return writeFileSync(`${this.#dir}/${name}.json`, JSON.stringify({}, 2, 4));
+    if (existsSync(`${this.#dir}/${name}.json`)) return false;
+    else
+      return writeFileSync(
+        `${this.#dir}/${name}.json`,
+        JSON.stringify({}, 2, 4)
+      );
   }
   /**
    * write on database
@@ -51,10 +60,10 @@ export default class {
    */
   path(name) {
     if (!existsSync(`${this.#dir}/${name}.json`)) return false;
-     else {
+    else {
       let path = `${this.#dir}/${name}.json`;
       return path;
-     }
+    }
   }
   /**
    * clear a database
@@ -70,7 +79,7 @@ export default class {
    * @param {strring} id the database name
    */
   get(id) {
-    if(!this.path(id)) return false;
+    if (!this.path(id)) return false;
     else {
       return JSON.parse(readFileSync(this.path(id)));
     }
