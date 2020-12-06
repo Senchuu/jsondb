@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync, writeFileSync } from "fs";
+import { mkdirSync, existsSync, writeFileSync, readFileSync } from "fs";
 
 /**
  * The database
@@ -21,10 +21,8 @@ export default class {
    */
   set(name) {
     if (existsSync(`${this.#dir}/${name}.json`))
-      return `There is already an database with the name ${name} on the folder ${
-        this.#dir
-      }`;
-    else writeFileSync(`${this.#dir}/${name}.json`, JSON.stringify({}, 2, 4));
+      return false;
+    else return writeFileSync(`${this.#dir}/${name}.json`, JSON.stringify({}, 2, 4));
   }
   /**
    * write on database
@@ -32,7 +30,7 @@ export default class {
    * @param {string} id the database to write datas
    */
   write(id, data) {
-    let database = this.get(id);
+    let database = this.path(id);
     this._save(database, data);
   }
   /**
@@ -42,7 +40,6 @@ export default class {
    * @param {string} data the data to save
    */
   _save(path, data) {
-    console.log(path);
     writeFileSync(path, JSON.stringify(data, 2, 4), (err) => {
       if (err) console.error(err);
       else console.log("Succes data saving");
@@ -52,19 +49,30 @@ export default class {
    * get a path on database
    * @param {string} name the name of the data file to get
    */
-  get(name) {
-    if (!existsSync(`${this.#dir}/${name}.json`))
-      throw new Error(`No database found on ${name}`);
-    let path = `${this.#dir}/${name}.json`;
-    return path;
+  path(name) {
+    if (!existsSync(`${this.#dir}/${name}.json`)) return false;
+     else {
+      let path = `${this.#dir}/${name}.json`;
+      return path;
+     }
   }
   /**
    * clear a database
    * @param {string} id The name of the database
    */
   clear(id) {
-    let name = this.get(id);
-    if (name) this.write(id, {});
-    else throw new Error(`No database found on ${name}`);
+    let name = this.path(id);
+    if (name) return this.write(id, {});
+    else return false;
+  }
+  /**
+   * Get the database as object
+   * @param {strring} id the database name
+   */
+  get(id) {
+    if(!this.path(id)) return false;
+    else {
+      return JSON.parse(readFileSync(this.path(id)));
+    }
   }
 }
